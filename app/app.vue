@@ -1,5 +1,5 @@
 <template>
-  <div id="container">
+  <div id="container" @click="mouseEffect">
     <div
       class="bubles"
       v-for="b in bubles"
@@ -11,7 +11,24 @@
         left: b.position.x + 'px',
       }"
     ></div>
-    <div class="filter"></div>
+    <div class="cursor" ref="mouse"></div>
+    <div class="filter">
+      <NuxtImg
+        preload
+        fit="cover"
+        :src="imgUrl"
+        class="md:hidden w-screen h-screen"
+      />
+
+      <video
+        autoplay
+        muted
+        loop
+        class="hidden md:block w-screen h-screen object-cover"
+      >
+        <source :src="videoUrl" type="video/mp4" />
+      </video>
+    </div>
     <div id="screen">
       <div
         class="bg-slate-400 absolute top-0 left-1/2 -translate-x-1/2 w-28 h-2 rounded-b-md"
@@ -61,12 +78,33 @@ const bubles = ref([]);
 function random(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
+const mouse = ref(null);
+const videoList = [...Array(2)].map((_, i) => "/bg/" + i + ".mp4");
+const imgList = [...Array(4)].map((_, i) => "/bg/mobile/" + i + ".jpg");
+const videoUrl = ref(videoList[0]);
+const imgUrl = ref(imgList[random(0, imgList.length - 1)]);
 
 const interval = ref(null);
+
+function mousemove(e) {
+  mouse.value.style.top = e.pageY + "px";
+  mouse.value.style.left = e.pageX + "px";
+}
+function mouseEffect(_) {
+  const size = +(RegExp(/[0-9]*/).exec(mouse.value.style.width)[0] || 5);
+  mouse.value.style.width = size * 2 + "rem";
+  mouse.value.style.height = size * 2 + "rem";
+  setTimeout(() => {
+    const size = +(RegExp(/[0-9]*/).exec(mouse.value.style.width)[0] || 5);
+    mouse.value.style.width = size / 2 + "rem";
+    mouse.value.style.height = size / 2 + "rem";
+  }, 2000);
+}
 onMounted(() => {
-  const nb = random(30, 200);
+  videoUrl.value = videoList[random(0, videoList.length - 1)];
+  const nb = Math.floor(window.screen.width * 0.5);
   bubles.value = [...Array(nb)].map(() => {
-    const size = random(5, 20) + "px";
+    const size = random(10, 60) + "px";
     const position = {
       x: random(0, window.screen.width),
       y: random(0, window.screen.height),
@@ -75,6 +113,7 @@ onMounted(() => {
     const direction = { x: random(-1, 1), y: random(-1, 1) };
     return { size, position, speed, direction };
   });
+  document.addEventListener("mousemove", mousemove);
   interval.value = setInterval(() => {
     bubles.value = bubles.value.map((e) => {
       e.position.x += e.speed * e.direction.x;
@@ -91,12 +130,13 @@ onMounted(() => {
 });
 onBeforeUnmount(() => {
   clearInterval(interval.value);
+  document.removeEventListener("mousemove", mousemove);
 });
 </script>
 
 <style lang="scss" scoped>
 #container {
-  @apply flex items-center justify-center w-screen h-screen text-white bg-black bg-opacity-90;
+  @apply flex items-center justify-center w-screen h-screen text-white bg-black bg-opacity-90 overflow-hidden;
 }
 #screen {
   @apply rounded-3xl border-4 border-slate-400 shadow max-w-md w-1/4 min-w-80 p-4 flex flex-col gap-4;
@@ -114,12 +154,16 @@ a {
 }
 .filter {
   @apply absolute top-0 left-0 right-0 bottom-0;
-  background-image: url("/bg.jpg");
   background-size: cover;
   background-position-y: bottom;
   mix-blend-mode: multiply;
 }
 .bubles {
-  @apply absolute top-0 left-0 rounded-full bg-white;
+  @apply absolute top-0 left-0 rounded-full bg-white md:bg-slate-600;
+}
+
+.cursor {
+  @apply absolute bg-white rounded-full w-40 h-40 -translate-x-1/2 -translate-y-1/2;
+  transition: width 1s ease-out, height 1s ease-out;
 }
 </style>
