@@ -66,6 +66,11 @@ const defaultLink = [
     label: "GitHub",
     href: "https://github.com/MrDant",
   },
+  {
+    icon: "i-grommet-icons-linkedin",
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/in/ma%C3%ABl-d-antuono-985490170/",
+  },
 ];
 const projectLink = [
   {
