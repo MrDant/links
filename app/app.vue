@@ -141,7 +141,7 @@ onBeforeUnmount(() => {
 
 <style lang="scss" scoped>
 #container {
-  @apply flex items-center justify-center w-screen h-screen text-white bg-black bg-opacity-90 overflow-hidden;
+  @apply flex items-center justify-center w-screen h-screen text-white bg-black bg-opacity-90 overflow-hidden relative;
 }
 #screen {
   @apply rounded-3xl border-4 border-slate-400 shadow max-w-md w-1/4 min-w-80 p-4 flex flex-col gap-4;
